@@ -31,7 +31,7 @@ interface OnboardingStep {
 }
 
 export default function DashboardHomePage() {
-  const { userProfile } = useAuth()
+  const { userProfile, user, loading } = useAuth()
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [showPricing, setShowPricing] = useState(false)
@@ -65,12 +65,36 @@ export default function DashboardHomePage() {
   const progressPercentage = (completedSteps / steps.length) * 100
 
   useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/signin')
+    }
+  }, [user, loading, router])
+
+  useEffect(() => {
     // Auto-advance to next incomplete step
     const nextIncompleteStep = steps.find(step => !step.completed)
     if (nextIncompleteStep) {
       setCurrentStep(nextIncompleteStep.id)
     }
   }, [isOnboardingCompleted])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img 
+            src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
+            alt="Flowscape Logo"
+            className="h-16 w-auto"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   const handleSelectPlan = (plan: any) => {
     console.log("Selected plan:", plan)
