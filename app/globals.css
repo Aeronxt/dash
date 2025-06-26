@@ -1,0 +1,301 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer base {
+  :root {
+    --font-montserrat: 'Montserrat', sans-serif;
+    --font-oswald: 'Oswald', sans-serif;
+
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 214 80% 36%;  /* Blue #0057B7 */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 0%;  /* Black */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 100% 50%;  /* Red #FF0000 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 214 80% 36%;
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 214 80% 46%;  /* Lighter Blue for dark mode */
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 100%;  /* White */
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 100% 60%;  /* Brighter Red for dark mode */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 214 80% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-montserrat);
+    @apply font-bold tracking-tighter;
+  }
+  p, span, div, a, button {
+    font-family: var(--font-oswald);
+  }
+}
+
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-6 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-10 items-center justify-center rounded-md px-6 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 inline-flex h-10 items-center justify-center rounded-md px-6 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .racing-card {
+    @apply overflow-hidden rounded-lg transition-all duration-300 hover:shadow-xl;
+    transition: all 0.3s ease;
+  }
+  
+  .racing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .racing-card-img {
+    @apply h-64 w-full object-cover transition-transform duration-500 hover:scale-105;
+    transition: transform 0.6s ease;
+  }
+  
+  .racing-card:hover .racing-card-img {
+    transform: scale(1.05);
+  }
+  
+  .navbar-item {
+    @apply relative px-4 py-2 text-base font-medium transition-colors hover:text-primary;
+  }
+  
+  .navbar-item::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-300 ease-in-out;
+  }
+  
+  .navbar-item:hover::after {
+    @apply w-full;
+  }
+  
+  .active-navbar-item {
+    @apply text-primary;
+  }
+  
+  .active-navbar-item::after {
+    @apply w-full;
+  }
+
+  .navbar-item.nav-link {
+    transition: color 0.2s;
+  }
+  .navbar-item.nav-link:hover,
+  .navbar-item.nav-link:active {
+    color: hsl(var(--accent));
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Tab animations */
+  .tab-content-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .tab-content-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+
+  .tab-content-exit {
+    opacity: 1;
+  }
+
+  .tab-content-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 300ms, transform 300ms;
+  }
+
+  /* Feature card hover effects */
+  .feature-card {
+    transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    background-color: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Hero video overlay gradient */
+  .hero-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+  }
+
+  /* Booking Form Styles */
+  .track-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .track-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .track-card:hover::before {
+    opacity: 1;
+  }
+
+  .track-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  .track-card.selected {
+    border-color: hsl(var(--accent));
+    box-shadow: 0 0 0 2px hsl(var(--accent));
+  }
+
+  .track-card img {
+    transition: transform 0.6s ease;
+  }
+
+  .track-card:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Progress Steps Animation */
+  .step-indicator {
+    transition: all 0.3s ease;
+  }
+
+  .step-indicator.active {
+    transform: scale(1.1);
+  }
+
+  .step-line {
+    transition: background-color 0.3s ease;
+  }
+
+  .step-line.active {
+    background-color: hsl(var(--accent));
+  }
+
+  /* Form Field Animations */
+  .form-field {
+    transition: all 0.2s ease;
+  }
+
+  .form-field:focus-within {
+    transform: translateY(-2px);
+  }
+
+  /* Submit Button Animation */
+  .submit-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s ease;
+  }
+
+  .submit-button:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Confirmation Page Animations */
+  .confirmation-field {
+    transition: all 0.3s ease;
+  }
+
+  .confirmation-field:hover {
+    background-color: hsl(var(--accent)/0.1);
+    border-radius: 0.5rem;
+  }
+}
