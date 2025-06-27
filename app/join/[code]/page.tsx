@@ -99,25 +99,40 @@ export default function JoinTeamPage() {
   }
 
   const handleJoinTeam = async () => {
-    if (!user || !invitation) return
+    if (!user || !invitation) {
+      console.error('Missing user or invitation:', { user: !!user, invitation: !!invitation })
+      return
+    }
+
+    console.log('Starting team join process...')
+    console.log('User:', user.id)
+    console.log('Invitation:', invitation)
 
     setJoining(true)
     try {
+      // Get the team owner ID - invited_by is an object when joined
+      const teamOwnerId = invitation.invited_by?.id || invitation.invited_by
+      console.log('Team owner ID:', teamOwnerId)
+
       // Check if user is already a team member
-      const { data: existingMember } = await supabase
+      const { data: existingMember, error: existingMemberError } = await supabase
         .from('team_members')
         .select('*')
-        .eq('team_owner_id', invitation.invited_by)
+        .eq('team_owner_id', teamOwnerId)
         .eq('member_id', user.id)
         .single()
 
+      console.log('Existing member check:', { existingMember, existingMemberError })
+
       if (existingMember) {
+        console.log('User is already a team member')
         setError('You are already a member of this team.')
         setJoining(false)
         return
       }
 
       // Update invitation status
+      console.log('Updating invitation status...')
       const { error: updateError } = await supabase
         .from('team_invitations')
         .update({
@@ -129,46 +144,61 @@ export default function JoinTeamPage() {
 
       if (updateError) {
         console.error('Error updating invitation:', updateError)
-        setError('Failed to accept invitation. Please try again.')
+        setError(`Failed to accept invitation: ${updateError.message}`)
         setJoining(false)
         return
       }
 
+      console.log('Invitation updated successfully')
+
+      // Prepare team member data
+      const teamMemberData = {
+        team_owner_id: teamOwnerId,
+        member_id: user.id,
+        role: invitation.role,
+        invited_by: teamOwnerId
+      }
+
+      console.log('Inserting team member with data:', teamMemberData)
+
       // Add user to team_members table
-      const { error: memberError } = await supabase
+      const { data: newMember, error: memberError } = await supabase
         .from('team_members')
-        .insert([
-          {
-            team_owner_id: invitation.invited_by,
-            member_id: user.id,
-            role: invitation.role,
-            invited_by: invitation.invited_by
-          }
-        ])
+        .insert([teamMemberData])
+        .select()
+        .single()
 
       if (memberError) {
         console.error('Error adding team member:', memberError)
-        setError('Failed to join team. Please try again.')
+        setError(`Failed to join team: ${memberError.message}`)
         setJoining(false)
         return
       }
 
+      console.log('Team member added successfully:', newMember)
+
       // Update user's team_owner_id
+      console.log('Updating user team_owner_id...')
       const { error: userUpdateError } = await supabase
         .from('flowscape_users')
-        .update({ team_owner_id: invitation.invited_by })
+        .update({ team_owner_id: teamOwnerId })
         .eq('id', user.id)
 
       if (userUpdateError) {
         console.error('Error updating user team_owner_id:', userUpdateError)
+        // Don't fail the whole process for this, just log it
+      } else {
+        console.log('User team_owner_id updated successfully')
       }
 
+      console.log('Team join completed successfully, redirecting...')
       // Redirect to dashboard
       router.push('/dashboard?joined=true')
 
     } catch (error) {
-      console.error('Error joining team:', error)
-      setError('An unexpected error occurred. Please try again.')
+      console.error('Unexpected error joining team:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      setError(`An unexpected error occurred: ${errorMessage}`)
       setJoining(false)
     }
   }
@@ -251,7 +281,7 @@ export default function JoinTeamPage() {
                 <Building2 className="w-5 h-5 text-blue-400" />
                 <div>
                   <p className="text-white font-medium">
-                    {invitation?.invited_by?.company_name || 'Team'}
+                    {invitation?.invited_by?.company || invitation?.invited_by?.business_name || 'Team'}
                   </p>
                   <p className="text-gray-400 text-sm">Company</p>
                 </div>
@@ -298,13 +328,13 @@ export default function JoinTeamPage() {
                 Create an account or sign in to join this team
               </p>
               <div className="space-y-2">
-                <Link href={`/auth/signup?invite=${invitation?.invitation_token}`} className="block">
+                <Link href={`/auth/signup?invite=${invitation?.link_code}`} className="block">
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Create Account & Join
                   </Button>
                 </Link>
-                <Link href={`/auth/signin?invite=${invitation?.invitation_token}`} className="block">
+                <Link href={`/auth/signin?invite=${invitation?.link_code}`} className="block">
                   <Button variant="outline" className="w-full bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800">
                     Sign In & Join
                   </Button>
