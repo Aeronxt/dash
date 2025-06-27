@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
 import { getStripeConfig } from "@/lib/stripe-config"
 
 interface PlanFeature {
@@ -319,15 +320,21 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
 
               <Button
                 onClick={async () => {
-                  // Special handling for Lite plan - create custom $9 checkout session
-                  if (plan.name === "Lite") {
+                  // Handle Bangladesh - show message for unsupported region
+                  if (country === "BD") {
+                    alert('Bangladesh payments are currently handled through special pricing. Please contact support for assistance with your subscription.');
+                    return;
+                  }
+
+                  // For AU and WW, use Stripe checkout sessions
+                  if (country === "AU" || country === "WW") {
                     // Check Stripe configuration before proceeding
                     if (!stripeConfig.isConfigured) {
                       alert(stripeConfig.error || 'Stripe is not configured. Please contact support to complete your purchase.');
                       return;
                     }
                     
-                    setLoadingPlan("Lite");
+                    setLoadingPlan(plan.name);
                     try {
                       const response = await fetch('/api/stripe/create-checkout-session', {
                         method: 'POST',
@@ -335,16 +342,35 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                           'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                          planName: 'Lite', // This ensures we hit the subscription logic
-                          amount: 9, // $9 AUD monthly subscription
-                          country: country || 'AU'
+                          planName: plan.name,
+                          amount: plan.price, // Use the calculated price for the selected country
+                          country: country
                         }),
                       });
 
                       const responseData = await response.json();
 
+                      console.log('📡 Stripe API Response:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries(response.headers.entries()),
+                        data: responseData
+                      });
+
                       if (!response.ok) {
-                        throw new Error(responseData.error || 'Failed to create checkout session');
+                        console.error('❌ Stripe API Error:', {
+                          status: response.status,
+                          error: responseData.error,
+                          details: responseData.details,
+                          timestamp: responseData.timestamp,
+                          fullResponse: responseData
+                        });
+                        
+                        const errorMessage = responseData.details 
+                          ? `${responseData.error}: ${responseData.details}`
+                          : responseData.error || 'Failed to create checkout session';
+                        
+                        throw new Error(errorMessage);
                       }
 
                       const { sessionId } = responseData;
@@ -368,16 +394,26 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                       }
                       
                     } catch (error) {
-                      console.error('Error creating checkout session:', error);
+                      console.error('❌ Complete error details:', {
+                        error,
+                        message: error instanceof Error ? error.message : 'Unknown error',
+                        stack: error instanceof Error ? error.stack : undefined,
+                        name: error instanceof Error ? error.name : undefined,
+                        type: typeof error,
+                        timestamp: new Date().toISOString()
+                      });
+                      
                       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-                      alert(`Failed to start checkout: ${errorMessage}. Please try again.`);
+                      
+                      // Show more detailed error to user
+                      alert(`Failed to start checkout: ${errorMessage}\n\nPlease check the browser console for more details and try again.`);
                     } finally {
                       setLoadingPlan(null);
                     }
                     return;
                   }
 
-                  // For other plans, use existing logic
+                  // Fallback for any other cases
                   const paymentLink = getPaymentLink(plan.name)
                   if (paymentLink) {
                     window.open(paymentLink, '_blank')
@@ -386,17 +422,22 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                   }
                 }}
                 variant={plan.buttonVariant}
-                disabled={loadingPlan === plan.name || (plan.name === "Lite" && !stripeConfig.isConfigured)}
+                disabled={
+                  loadingPlan === plan.name || 
+                  ((country === "AU" || country === "WW") && !stripeConfig.isConfigured)
+                }
                 className={`w-full mt-6 ${
                   plan.buttonVariant === "default"
                     ? "bg-blue-500 hover:bg-blue-600 text-white"
                     : "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
-                } ${plan.name === "Lite" && !stripeConfig.isConfigured ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${((country === "AU" || country === "WW") && !stripeConfig.isConfigured) ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {loadingPlan === plan.name 
                   ? "Processing..." 
-                  : plan.name === "Lite" && !stripeConfig.isConfigured
+                  : ((country === "AU" || country === "WW") && !stripeConfig.isConfigured)
                     ? "Configuration Required"
+                    : country === "BD"
+                    ? "Contact Support"
                     : plan.buttonText
                 }
               </Button>

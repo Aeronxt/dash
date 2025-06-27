@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ interface OnboardingStep {
 export default function DashboardHomePage() {
   const { userProfile, user, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [showPricing, setShowPricing] = useState(false)
 
@@ -83,6 +84,18 @@ export default function DashboardHomePage() {
       setCurrentStep(nextIncompleteStep.id)
     }
   }, [isOnboardingCompleted, isPlanSelected])
+
+  useEffect(() => {
+    // Check if user was redirected from cancelled Stripe session
+    const cancelled = searchParams.get('cancelled')
+    if (cancelled === 'true' && !isPlanSelected) {
+      setShowPricing(true)
+      // Clean up the URL by removing the cancelled parameter
+      const url = new URL(window.location.href)
+      url.searchParams.delete('cancelled')
+      router.replace(url.pathname + url.search)
+    }
+  }, [searchParams, isPlanSelected, router])
 
   if (loading) {
     return (
