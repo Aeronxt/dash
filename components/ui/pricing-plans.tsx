@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getStripeConfig } from "@/lib/stripe-config"
 
 interface PlanFeature {
   text: string
@@ -38,6 +39,9 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
   const [planType, setPlanType] = useState<"Personal" | "Business">("Personal")
   const [country, setCountry] = useState("AU")
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  
+  // Check Stripe configuration
+  const stripeConfig = getStripeConfig()
 
   // Helper function to get pricing based on country
   const getPricing = (basePrice: number) => {
@@ -317,12 +321,14 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                 onClick={async () => {
                   // Special handling for Lite plan - create custom $9 checkout session
                   if (plan.name === "Lite") {
+                    // Check Stripe configuration before proceeding
+                    if (!stripeConfig.isConfigured) {
+                      alert(stripeConfig.error || 'Stripe is not configured. Please contact support to complete your purchase.');
+                      return;
+                    }
+                    
                     setLoadingPlan("Lite");
                     try {
-                      // Validate environment
-                      if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-                        throw new Error('Stripe configuration missing');
-                      }
 
                       const response = await fetch('/api/stripe/create-checkout-session', {
                         method: 'POST',
@@ -350,9 +356,7 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                       
                       // Redirect to Stripe Checkout
                       const { loadStripe } = await import('@stripe/stripe-js');
-                      const stripeInstance = await loadStripe(
-                        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-                      );
+                      const stripeInstance = await loadStripe(stripeConfig.publishableKey!);
                       
                       if (!stripeInstance) {
                         throw new Error('Failed to load Stripe');
@@ -383,14 +387,19 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                   }
                 }}
                 variant={plan.buttonVariant}
-                disabled={loadingPlan === plan.name}
+                disabled={loadingPlan === plan.name || (plan.name === "Lite" && !stripeConfig.isConfigured)}
                 className={`w-full mt-6 ${
                   plan.buttonVariant === "default"
                     ? "bg-blue-500 hover:bg-blue-600 text-white"
                     : "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
-                }`}
+                } ${plan.name === "Lite" && !stripeConfig.isConfigured ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {loadingPlan === plan.name ? "Processing..." : plan.buttonText}
+                {loadingPlan === plan.name 
+                  ? "Processing..." 
+                  : plan.name === "Lite" && !stripeConfig.isConfigured
+                    ? "Configuration Required"
+                    : plan.buttonText
+                }
               </Button>
             </CardContent>
           </Card>
