@@ -329,16 +329,15 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                     
                     setLoadingPlan("Lite");
                     try {
-
                       const response = await fetch('/api/stripe/create-checkout-session', {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                          planName: 'Lite',
-                          amount: 9, // $9 charge
-                          country: country
+                          planName: 'Lite', // This ensures we hit the subscription logic
+                          amount: 9, // $9 AUD monthly subscription
+                          country: country || 'AU'
                         }),
                       });
 

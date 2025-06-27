@@ -79,7 +79,7 @@ export default function HomePage() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-4">Welcome to Flowscape</h1>
             <p className="text-gray-400 mb-8">
-              Your comprehensive platform for racing, esports, and digital experiences.
+              Your comprehensive digital platform for modern experiences.
             </p>
           </div>
           
@@ -102,20 +102,7 @@ export default function HomePage() {
           
           <div className="pt-4">
             <p className="text-gray-500 text-sm">
-              Explore our{" "}
-              <button 
-                onClick={() => router.push('/about')}
-                className="text-white hover:text-gray-300 underline"
-              >
-                features
-              </button>
-              {" "}or{" "}
-              <button 
-                onClick={() => router.push('/contact')}
-                className="text-white hover:text-gray-300 underline"
-              >
-                contact us
-              </button>
+              Get started by creating an account or signing in to access your dashboard.
             </p>
           </div>
         </div>

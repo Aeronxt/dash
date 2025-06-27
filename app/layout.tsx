@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Acme Inc.',
-  description: 'Modern dashboard interface for data visualization and management.',
+  title: 'Flowscape',
+  description: 'Flowscape - Your comprehensive digital platform.',
 };
 
 export default function RootLayout({

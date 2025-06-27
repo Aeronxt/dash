@@ -5,33 +5,39 @@ export async function POST(request: NextRequest) {
   try {
     const { priceId, country, planName, amount } = await request.json();
 
-    // If amount is provided (for custom pricing), create a one-time payment
-    if (amount && planName === 'Lite') {
+    // ALWAYS create subscription for Lite plan (whether amount is provided or not)
+    if (planName === 'Lite') {
+      const finalAmount = amount || 9; // Default to $9 AUD if no amount specified
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
           {
             price_data: {
-              currency: 'usd',
+              currency: 'aud', // Australian Dollars
               product_data: {
                 name: `${planName} Plan`,
                 description: 'Perfect for getting started - Interactive Blog + 1 Page',
                 images: [], // Add product images if available
               },
-              unit_amount: amount * 100, // Convert to cents
+              unit_amount: finalAmount * 100, // Convert to cents (9 AUD = 900 cents)
+              recurring: {
+                interval: 'month',
+                interval_count: 1,
+              },
             },
             quantity: 1,
           },
         ],
-        mode: 'payment', // One-time payment
-        success_url: `${request.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}&plan=lite&amount=${amount}`,
+        mode: 'subscription', // Monthly recurring subscription
+        success_url: `${request.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}&plan=lite&amount=${finalAmount}`,
         cancel_url: `${request.headers.get('origin')}/experiences?cancelled=true`,
         customer_creation: 'always',
         metadata: {
           plan_name: planName,
           plan_type: 'lite',
-          amount: amount.toString(),
-          country: country || 'US'
+          amount: finalAmount.toString(),
+          country: country || 'AU',
+          billing_cycle: 'monthly'
         },
         // Production-ready settings
         allow_promotion_codes: true,
@@ -40,44 +46,15 @@ export async function POST(request: NextRequest) {
           allowed_countries: ['US', 'CA', 'AU', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'BD'], // Add more countries as needed
         },
       });
-
+      
       return NextResponse.json({ sessionId: session.id });
     }
 
-    // Define price mapping based on country for subscription plans
-    const priceMapping: { [key: string]: { [key: string]: string } } = {
-      'AU': {
-        'lite': 'price_1QMtQOBkdmq9zTCaB2x8AAAA', // A$15/month
-      },
-      'WW': {
-        'lite': 'price_1QMtQPBkdmq9zTCaC3y9BBBB', // $12/month
-      },
-      'BD': {
-        'lite': 'price_1QMtQQBkdmq9zTCaD4z0CCCC', // ৳1200/month
-      }
-    };
-
-    const stripePriceId = priceMapping[country]?.[priceId];
-    
-    if (!stripePriceId) {
-      return NextResponse.json({ error: 'Invalid price or country' }, { status: 400 });
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: stripePriceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: `${request.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get('origin')}/experiences`,
-      customer_creation: 'always',
-    });
-
-    return NextResponse.json({ sessionId: session.id });
+    // For any other plans or if not Lite plan, return error for now
+    // This ensures we only handle Lite plan subscriptions through the custom price_data above
+    return NextResponse.json({ 
+      error: 'Only Lite plan subscriptions are currently supported. Please use planName: "Lite"' 
+    }, { status: 400 });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

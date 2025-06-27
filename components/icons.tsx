@@ -11,7 +11,6 @@ import {
   Globe,
   Home,
   Instagram,
-
   MapPin,
   Menu,
   Moon,
@@ -26,7 +25,6 @@ import {
   Youtube,
   type IconNode as LucideIcon,
 } from "lucide-react"
-import { FlagTriangleRight } from "lucide-react"
 import Image from "next/image"
 
 export type Icon = LucideIcon
@@ -34,15 +32,14 @@ export type Icon = LucideIcon
 export const Icons = {
   logo: ({ src, alt, width, height, ...rest }: React.ComponentProps<typeof Image>) => (
     <Image
-      src={src || "https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/webimages//atxrlog%20white%20(1).png"}
-      alt={alt || "ATXR Racing Logo"}
+      src={src || "https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"}
+      alt={alt || "Flowscape Logo"}
       width={width || 40}
       height={height || 40}
       {...rest}
     />
   ),
   close: X,
-
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
   arrowRight: ArrowRight,
@@ -66,18 +63,6 @@ export const Icons = {
   twitter: Twitter,
   instagram: Instagram,
   youtube: Youtube,
-  
-  // BMW Logo Icon
-  bmw: ({ width = 32, height = 32, className = "", ...rest }) => (
-    <Image
-      src="https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/other//BMW-Logo-PNG.png"
-      alt="BMW Logo"
-      width={width}
-      height={height}
-      className={className}
-      {...rest}
-    />
-  ),
   
   // Provider Icons
   google: ({ ...props }: React.SVGProps<SVGSVGElement>) => (

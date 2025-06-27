@@ -6,21 +6,10 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import { Icons } from "@/components/icons"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { useAuth } from "@/hooks/use-auth"
 import { Menu, X, User, LogOut } from "lucide-react"
-import clsx from 'clsx'
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -38,19 +27,10 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Only keep essential navigation items
   const navigationItems = [
     { href: "/", label: "Home" },
-    { href: "/experiences", label: "Experiences" },
-    { href: "/race", label: "Race" },
-    { href: "/about", label: "About Us" },
-    { href: "/esports", label: "Esports" },
-    { href: "/sponsors", label: "Sponsors" },
-    { href: "/calendar", label: "Calendar" },
-    { href: "/videos", label: "Videos" },
-    { href: "/news", label: "News" },
-    { href: "/jobs", label: "Jobs" },
-    { href: "/shop", label: "Shop" },
-    { href: "/contact", label: "Contact" }
+    { href: "/dashboard", label: "Dashboard" }
   ]
 
   return (
@@ -62,9 +42,9 @@ export function SiteHeader() {
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
             <img 
-              src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/flowscape//flowscape%20logo.png"
+              src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
               alt="Flowscape Logo"
-              className="h-28 w-auto"
+              className="h-16 w-auto"
             />
           </Link>
         </div>
@@ -141,7 +121,7 @@ export function SiteHeader() {
                 <div className="flex items-center justify-between pb-6 border-b border-accent/20">
                   <Link href="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
                     <img 
-                      src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/flowscape//flowscape%20logo.png"
+                      src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
                       alt="Flowscape Logo"
                       className="h-16 w-auto"
                     />
@@ -201,7 +181,7 @@ export function SiteHeader() {
                       </Button>
                     </>
                   ) : (
-                    <>
+                    <div className="space-y-3">
                       <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
                         <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-black">
                           Sign In
@@ -212,22 +192,9 @@ export function SiteHeader() {
                           Sign Up
                         </Button>
                       </Link>
-                    </>
+                    </div>
                   )}
-                  <Link href="/experiences/book" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className="w-full bg-accent hover:bg-accent/90 text-black font-bold">
-                      Book Experience
-                    </Button>
-                  </Link>
-                  <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-black">
-                      Contact Us
-                    </Button>
-                  </Link>
                 </div>
-
-                {/* Racing-inspired decoration */}
-                <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-accent via-primary to-accent opacity-50" />
               </div>
             </SheetContent>
           </Sheet>
@@ -236,29 +203,3 @@ export function SiteHeader() {
     </header>
   )
 }
-
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  )
-})
-ListItem.displayName = "ListItem"

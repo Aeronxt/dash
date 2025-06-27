@@ -37,6 +37,7 @@ export default function DashboardHomePage() {
   const [showPricing, setShowPricing] = useState(false)
 
   const isOnboardingCompleted = userProfile?.onboarding_completed || false
+  const isPlanSelected = userProfile?.subscription_plan === 'lite'
 
   const steps: OnboardingStep[] = [
     {
@@ -53,11 +54,16 @@ export default function DashboardHomePage() {
       title: "Choose Your Plan",
       description: "Select the perfect plan for your needs and start building",
       icon: <Settings className="w-5 h-5" />,
-      completed: false, // For now, always false as requested
-      action: () => {
-        setShowPricing(true)
-      },
-      actionText: "Choose Plan"
+      completed: isPlanSelected,
+              action: () => {
+          if (isPlanSelected) {
+            // If plan is already selected, show current plan details
+            alert(`You are currently on the ${userProfile?.subscription_plan || 'Lite'} plan!`)
+          } else {
+            setShowPricing(true)
+          }
+        },
+      actionText: isPlanSelected ? "View Plan" : "Choose Plan"
     }
   ]
 
@@ -76,7 +82,7 @@ export default function DashboardHomePage() {
     if (nextIncompleteStep) {
       setCurrentStep(nextIncompleteStep.id)
     }
-  }, [isOnboardingCompleted])
+  }, [isOnboardingCompleted, isPlanSelected])
 
   if (loading) {
     return (
