@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,23 +24,38 @@ export default function JoinTeamPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [joining, setJoining] = useState(false)
+  const validationAttempted = useRef(false)
+  const joinAttempted = useRef(false)
 
   const code = params?.code as string
 
   useEffect(() => {
-    if (code) {
+    if (code && !validationAttempted.current) {
+      console.log('Starting validation for code:', code)
+      validationAttempted.current = true
       validateInvitationCode()
     }
-  }, [code])
+  }, [code]) // Only depend on code
 
   useEffect(() => {
     // If user is already logged in and we have a valid invitation, auto-join
-    if (user && invitation && !joining) {
+    if (user && invitation && !joining && !error && !joinAttempted.current) {
+      console.log('Auto-joining team for logged in user')
+      joinAttempted.current = true
       handleJoinTeam()
     }
-  }, [user, invitation])
+  }, [user, invitation]) // Don't include joining to avoid loops
 
   const validateInvitationCode = async () => {
+    console.log('Validating invitation code:', code)
+    
+    if (!code) {
+      console.log('No code provided')
+      setError('Invalid invitation link.')
+      setLoading(false)
+      return
+    }
+
     try {
       const { data: invitationData, error } = await supabase
         .from('team_invitations')
@@ -53,16 +68,32 @@ export default function JoinTeamPage() {
         .gt('expires_at', new Date().toISOString())
         .single()
 
-      if (error || !invitationData) {
+      console.log('Validation result:', { invitationData, error })
+
+      if (error) {
+        console.log('Database error:', error)
+        if (error.code === 'PGRST116') {
+          // No rows returned
+          setError('This invitation link is invalid or has expired.')
+        } else {
+          setError('Failed to validate invitation. Please try again.')
+        }
+        return
+      }
+
+      if (!invitationData) {
+        console.log('No invitation data returned')
         setError('This invitation link is invalid or has expired.')
         return
       }
 
+      console.log('Setting invitation data:', invitationData)
       setInvitation(invitationData)
     } catch (error) {
       console.error('Error validating invitation:', error)
       setError('Failed to validate invitation. Please try again.')
     } finally {
+      console.log('Setting loading to false')
       setLoading(false)
     }
   }
