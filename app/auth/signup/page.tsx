@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signUp, signInWithGoogle, signInWithGitHub } = useAuth()
   const { toast } = useToast()
   
@@ -29,6 +30,47 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const [invitation, setInvitation] = useState<any>(null)
+  const [invitationToken, setInvitationToken] = useState<string | null>(null)
+
+  // Check for invitation token in URL
+  useEffect(() => {
+    const inviteParam = searchParams.get('invite')
+    if (inviteParam) {
+      setInvitationToken(inviteParam)
+      validateInvitation(inviteParam)
+    }
+  }, [searchParams])
+
+  const validateInvitation = async (token: string) => {
+    try {
+      const response = await fetch('/api/invitations/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invitationToken: token })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setInvitation(data.invitation)
+        setFormData(prev => ({ ...prev, email: data.invitation.email }))
+        toast({
+          title: "Invitation Found!",
+          description: `You've been invited to join ${data.invitation.companyName} by ${data.invitation.invitedBy}`
+        })
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid Invitation",
+          description: "This invitation link is invalid or has expired."
+        })
+        // Remove the invite param from URL
+        router.replace('/auth/signup')
+      }
+    } catch (error) {
+      console.error('Error validating invitation:', error)
+    }
+  }
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {}
@@ -83,10 +125,33 @@ export default function SignUpPage() {
       }
 
       if (data && data.user) {
-        toast({
-          title: "Account created successfully!",
-          description: "Please check your email to verify your account before signing in."
-        })
+        // If there's an invitation token, accept the invitation
+        if (invitationToken) {
+          try {
+            const inviteResponse = await fetch('/api/invitations/validate', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                invitationToken: invitationToken, 
+                userId: data.user.id 
+              })
+            })
+
+            if (inviteResponse.ok) {
+              toast({
+                title: "Welcome to the team!",
+                description: "Your account has been created and you've been added to the team."
+              })
+            }
+          } catch (error) {
+            console.error('Error accepting invitation:', error)
+          }
+        } else {
+          toast({
+            title: "Account created successfully!",
+            description: "Please check your email to verify your account before signing in."
+          })
+        }
         
         router.push('/auth/signin')
       }
@@ -121,9 +186,27 @@ export default function SignUpPage() {
           </div>
           <CardTitle className="text-3xl text-white">Create your account</CardTitle>
           <CardDescription className="text-gray-400">
-            Join Flowscape and start your journey
+            {invitation ? `Join ${invitation.companyName} on Flowscape` : "Join Flowscape and start your journey"}
           </CardDescription>
         </CardHeader>
+        
+        {/* Invitation Banner */}
+        {invitation && (
+          <div className="mx-6 mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600/20 rounded-full">
+                <User className="w-4 h-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-white font-medium">Team Invitation</p>
+                <p className="text-gray-400 text-sm">
+                  {invitation.invitedBy} has invited you to join {invitation.companyName} as a {invitation.role}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <CardContent>
           <div className="space-y-4 mb-6">
             <div className="flex items-center justify-center">
@@ -233,6 +316,7 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-gray-600"
+                  readOnly={!!invitation}
                   required
                 />
               </div>

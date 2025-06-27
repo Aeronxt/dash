@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function SignInPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signIn, signUp, signInWithGoogle, signInWithGitHub, resetPassword } = useAuth()
   const { toast } = useToast()
   
@@ -31,6 +32,15 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const [invitationToken, setInvitationToken] = useState<string | null>(null)
+
+  // Check for invitation token in URL
+  useEffect(() => {
+    const inviteParam = searchParams.get('invite')
+    if (inviteParam) {
+      setInvitationToken(inviteParam)
+    }
+  }, [searchParams])
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {}
@@ -115,10 +125,33 @@ export default function SignInPage() {
         }
 
         if (data?.user) {
-          toast({
-            title: "Welcome back!",
-            description: "You have been signed in successfully."
-          })
+          // If there's an invitation token, accept the invitation
+          if (invitationToken) {
+            try {
+              const inviteResponse = await fetch('/api/invitations/validate', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  invitationToken: invitationToken, 
+                  userId: data.user.id 
+                })
+              })
+
+              if (inviteResponse.ok) {
+                toast({
+                  title: "Welcome to the team!",
+                  description: "You've been signed in and added to the team."
+                })
+              }
+            } catch (error) {
+              console.error('Error accepting invitation:', error)
+            }
+          } else {
+            toast({
+              title: "Welcome back!",
+              description: "You have been signed in successfully."
+            })
+          }
           
           // Redirect to dashboard after successful signin
           router.push('/')

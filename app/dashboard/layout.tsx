@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
@@ -8,11 +8,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { 
   Home,
-  BarChart3,
   Users,
   Settings,
-  FileText,
-  Calendar,
   MessageSquare,
   Folder,
   LogOut,
@@ -25,13 +22,8 @@ import Loader from "@/components/ui/loader"
 const sidebarItems = [
   {
     title: "Home",
-    href: "/",
-    icon: Home
-  },
-  {
-    title: "Dashboard",
     href: "/dashboard",
-    icon: BarChart3
+    icon: Home
   },
   {
     title: "Projects",
@@ -42,16 +34,6 @@ const sidebarItems = [
     title: "Team",
     href: "/team",
     icon: Users
-  },
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: FileText
-  },
-  {
-    title: "Calendar",
-    href: "/calendar",
-    icon: Calendar
   },
   {
     title: "Messages",
@@ -74,12 +56,30 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const { user, userProfile, loading, signOut } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pageLoading, setPageLoading] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/signin')
     }
   }, [user, loading, router])
+
+  // Handle page loading state based on pathname changes
+  useEffect(() => {
+    // Reset loading state when pathname changes (page has loaded)
+    setPageLoading(false)
+  }, [pathname])
+
+  const handleNavigation = (href: string) => {
+    if (pathname !== href) {
+      setPageLoading(true)
+      // Immediate navigation with visual feedback
+      router.push(href)
+      setSidebarOpen(false)
+    } else {
+      setSidebarOpen(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -138,16 +138,27 @@ export default function DashboardLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setSidebarOpen(false)}
+                  prefetch={true}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleNavigation(item.href)
+                  }}
+                  onMouseEnter={() => router.prefetch(item.href)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105 relative overflow-hidden",
                     isActive 
-                      ? "bg-gray-800 text-white border-l-4 border-gray-600" 
-                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                      ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border-l-4 border-blue-500 shadow-lg shadow-blue-500/20" 
+                      : "text-gray-400 hover:text-white hover:bg-gray-800/50 hover:border-l-4 hover:border-gray-600"
                   )}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className={cn(
+                    "h-5 w-5 transition-all duration-300",
+                    pageLoading && pathname !== item.href ? "animate-pulse" : ""
+                  )} />
                   {item.title}
+                  {pageLoading && pathname !== item.href && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+                  )}
                 </Link>
               )
             })}
@@ -203,8 +214,33 @@ export default function DashboardLayout({
         </div>
 
         {/* Page content */}
-        <main className="min-h-screen bg-black">
-          {children}
+        <main className="min-h-screen bg-black relative">
+          {/* Loading overlay */}
+          {pageLoading && (
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center transition-all duration-300">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-white text-xs opacity-75">Loading...</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Page content with transition */}
+          <div className={cn(
+            "transition-all duration-300 ease-in-out",
+            pageLoading ? "opacity-50 scale-95" : "opacity-100 scale-100"
+          )}>
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-screen">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-white text-sm">Loading page...</p>
+                </div>
+              </div>
+            }>
+              {children}
+            </Suspense>
+          </div>
         </main>
       </div>
     </div>
