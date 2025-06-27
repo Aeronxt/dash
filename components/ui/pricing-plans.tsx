@@ -37,6 +37,7 @@ interface PricingPlansProps {
 export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
   const [planType, setPlanType] = useState<"Personal" | "Business">("Personal")
   const [country, setCountry] = useState("AU")
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   // Helper function to get pricing based on country
   const getPricing = (basePrice: number) => {
@@ -313,7 +314,67 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
               </div>
 
               <Button
-                onClick={() => {
+                onClick={async () => {
+                  // Special handling for Lite plan - create custom $9 checkout session
+                  if (plan.name === "Lite") {
+                    setLoadingPlan("Lite");
+                    try {
+                      // Validate environment
+                      if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+                        throw new Error('Stripe configuration missing');
+                      }
+
+                      const response = await fetch('/api/stripe/create-checkout-session', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          planName: 'Lite',
+                          amount: 9, // $9 charge
+                          country: country
+                        }),
+                      });
+
+                      const responseData = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(responseData.error || 'Failed to create checkout session');
+                      }
+
+                      const { sessionId } = responseData;
+                      
+                      if (!sessionId) {
+                        throw new Error('No session ID received');
+                      }
+                      
+                      // Redirect to Stripe Checkout
+                      const { loadStripe } = await import('@stripe/stripe-js');
+                      const stripeInstance = await loadStripe(
+                        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                      );
+                      
+                      if (!stripeInstance) {
+                        throw new Error('Failed to load Stripe');
+                      }
+
+                      const { error } = await stripeInstance.redirectToCheckout({ sessionId });
+                      
+                      if (error) {
+                        throw new Error(error.message || 'Stripe checkout failed');
+                      }
+                      
+                    } catch (error) {
+                      console.error('Error creating checkout session:', error);
+                      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+                      alert(`Failed to start checkout: ${errorMessage}. Please try again.`);
+                    } finally {
+                      setLoadingPlan(null);
+                    }
+                    return;
+                  }
+
+                  // For other plans, use existing logic
                   const paymentLink = getPaymentLink(plan.name)
                   if (paymentLink) {
                     window.open(paymentLink, '_blank')
@@ -322,13 +383,14 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                   }
                 }}
                 variant={plan.buttonVariant}
+                disabled={loadingPlan === plan.name}
                 className={`w-full mt-6 ${
                   plan.buttonVariant === "default"
                     ? "bg-blue-500 hover:bg-blue-600 text-white"
                     : "bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
                 }`}
               >
-                {plan.buttonText}
+                {loadingPlan === plan.name ? "Processing..." : plan.buttonText}
               </Button>
             </CardContent>
           </Card>

@@ -12,11 +12,15 @@ interface PaymentDetails {
   customer_email: string;
   amount_total: number;
   currency: string;
+  metadata?: any;
+  mode?: string;
 }
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const planType = searchParams.get('plan');
+  const amount = searchParams.get('amount');
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +86,10 @@ export default function PaymentSuccessPage() {
           </div>
           <CardTitle className="text-green-600">Payment Successful!</CardTitle>
           <CardDescription>
-            Thank you for your subscription to the Lite plan.
+            {planType === 'lite' 
+              ? `Thank you for your purchase of the Lite plan${amount ? ` for $${amount}` : ''}!`
+              : 'Thank you for your subscription to the Lite plan.'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

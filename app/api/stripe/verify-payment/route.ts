@@ -17,6 +17,8 @@ export async function GET(request: NextRequest) {
       customer_email: session.customer_details?.email,
       amount_total: session.amount_total,
       currency: session.currency,
+      metadata: session.metadata,
+      mode: session.mode, // 'payment' for one-time, 'subscription' for recurring
     });
   } catch (error) {
     console.error('Error verifying payment:', error);
