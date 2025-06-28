@@ -31,6 +31,19 @@
   }
 }
 
+@theme inline {
+  --color-destructive-foreground: var(--destructive-foreground);
+}
+
+:root {
+  --radius: 1rem;
+  --destructive-foreground: oklch(0.985 0 0);
+}
+
+.dark {
+  --destructive-foreground: oklch(0.985 0 0);
+}
+
 @layer base {
   :root {
     --font-montserrat: 'Montserrat', sans-serif;
@@ -59,11 +72,11 @@
   }
   
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
+    --card: 0 0% 0%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 0 0% 0%;
     --popover-foreground: 0 0% 98%;
     --primary: 214 80% 46%;  /* Lighter Blue for dark mode */
     --primary-foreground: 0 0% 9%;
