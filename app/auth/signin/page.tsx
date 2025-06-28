@@ -276,22 +276,22 @@ export default function SignInPage() {
 
   // Success state component
   if (showSuccess) {
-    return (
+  return (
       <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
         <div className="relative z-10 text-center space-y-8">
           {/* Checkmark */}
           <div className="flex justify-center">
             <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           {/* Success message */}
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-white">You&apos;re in!</h1>
             <p className="text-gray-400 text-lg">Welcome</p>
           </div>
-          
+
           {/* Continue button */}
           <Button 
             onClick={handleContinueToDashboard}
@@ -300,7 +300,7 @@ export default function SignInPage() {
             Continue to Dashboard
           </Button>
         </div>
-      </div>
+              </div>
     )
   }
 
@@ -314,80 +314,80 @@ export default function SignInPage() {
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input 
-            id="email" 
+              <Input
+                id="email"
             name="email" 
-            type="email" 
+                type="email"
             placeholder="m@example.com" 
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            required 
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                required
             autoComplete="email" 
-          />
+              />
           {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-        </div>
+            </div>
         <div className="grid gap-2">
           <PasswordInput 
             name="password" 
             label="Password" 
-            value={formData.password}
-            onChange={(e) => handleInputChange('password', e.target.value)}
-            required 
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  required
             autoComplete="current-password" 
             placeholder="••••••••" 
           />
           {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-        </div>
-        
+            </div>
+
         {/* Forgot Password Link */}
-        <div className="text-right">
+              <div className="text-right">
           <Button
-            type="button"
+                  type="button"
             variant="link"
             className="text-sm text-muted-foreground hover:text-foreground p-0 h-auto"
-            onClick={() => setShowForgotPassword(!showForgotPassword)}
-          >
-            Forgot password?
+                  onClick={() => setShowForgotPassword(!showForgotPassword)}
+                >
+                  Forgot password?
           </Button>
-        </div>
+              </div>
 
-        {/* Forgot Password Form */}
+            {/* Forgot Password Form */}
         {showForgotPassword && (
           <div className="bg-muted border border-border rounded-lg p-4 space-y-3">
-            <div className="text-center">
+                <div className="text-center">
               <h3 className="text-foreground font-medium">Reset Password</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Enter your email and we&apos;ll send you a link to reset your password
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={handleForgotPassword}
-                disabled={loading || !formData.email}
+                     Enter your email and we&apos;ll send you a link to reset your password
+                   </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={loading || !formData.email}
                 className="flex-1"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="scale-25">
-                      <Loader />
-                    </div>
-                  </div>
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowForgotPassword(false)}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="scale-25">
+                          <Loader />
+                        </div>
+                      </div>
+                    ) : (
+                      "Send Reset Link"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForgotPassword(false)}
                 className="px-4"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
 
         <Button 
           type="submit" 
@@ -433,7 +433,7 @@ export default function SignInPage() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
-          <Input 
+                  <Input
             id="email" 
             name="email" 
             type="email" 
@@ -461,31 +461,31 @@ export default function SignInPage() {
           <PasswordInput 
             name="confirmPassword" 
             label="Confirm Password" 
-            value={formData.confirmPassword}
-            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            required 
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                    required
             autoComplete="new-password" 
             placeholder="••••••••"
           />
           {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
-        </div>
-        <Button 
-          type="submit" 
+              </div>
+            <Button 
+              type="submit" 
           variant="outline" 
           className="mt-2"
-          disabled={loading}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center">
-              <div className="scale-25">
-                <Loader />
-              </div>
-            </div>
-          ) : (
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="scale-25">
+                    <Loader />
+                  </div>
+                </div>
+              ) : (
             "Sign Up"
-          )}
-        </Button>
-        
+              )}
+            </Button>
+
         {/* Terms */}
         <div className="text-center space-y-4">
           <p className="text-xs text-muted-foreground">
@@ -511,8 +511,8 @@ export default function SignInPage() {
             </Link>
             .
           </p>
-        </div>
-      </div>
+              </div>
+            </div>
     </form>
   )
 
@@ -533,26 +533,26 @@ export default function SignInPage() {
       <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
         <span className="relative z-10 bg-background px-2 text-muted-foreground">Or continue with</span>
       </div>
-      <Button 
+              <Button 
         variant="outline" 
-        type="button" 
-        onClick={handleGoogleSignIn}
-        disabled={loading}
-      >
-        <Icons.google className="mr-2 h-4 w-4" />
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                <Icons.google className="mr-2 h-4 w-4" />
         Continue with Google
-      </Button>
-      
-      <Button 
+              </Button>
+              
+              <Button 
         variant="outline" 
-        type="button" 
-        onClick={handleGitHubSignIn}
-        disabled={loading}
-      >
-        <Github className="mr-2 h-4 w-4" />
+                type="button"
+                onClick={handleGitHubSignIn}
+                disabled={loading}
+              >
+                <Github className="mr-2 h-4 w-4" />
         Continue with GitHub
-      </Button>
-    </div>
+              </Button>
+            </div>
   )
 
   return (
@@ -567,7 +567,7 @@ export default function SignInPage() {
       {/* Left Column: The Form */}
       <div className="flex h-screen items-center justify-center p-6 md:h-auto md:p-0 md:py-12 bg-black">
         <AuthFormContainer />
-      </div>
+          </div>
 
       {/* Right Column: The Iridescence Effect */}
       <div className="hidden md:block relative">
@@ -581,12 +581,12 @@ export default function SignInPage() {
         {/* Overlay for text readability */}
         <div className="absolute inset-0 bg-black/30" />
         
-        {/* Centered Logo */}
+        {/* Centered Image */}
         <div className="absolute inset-0 z-10 flex h-full items-center justify-center p-10">
           <img 
-            src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
-            alt="Flowscape Logo"
-            className="h-24 w-auto opacity-90"
+            src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//Darkshell2012.jpeg"
+            alt="Darkshell"
+            className="max-h-96 max-w-full object-contain opacity-90 rounded-lg shadow-2xl"
           />
         </div>
       </div>
