@@ -22,7 +22,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <img 
             src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
@@ -40,7 +40,7 @@ export default function HomePage() {
   if (user) {
     // Show loading while redirecting authenticated users
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <img 
             src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
@@ -58,7 +58,7 @@ export default function HomePage() {
 
   // Landing page for unauthenticated users
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen flex">
       {/* Left side - Logo */}
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center">

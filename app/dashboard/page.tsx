@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import PricingPlans from "@/components/ui/pricing-plans"
+import SplitText from "@/components/ui/split-text"
+import { BentoGrid } from "@/components/ui/bento-grid"
 import { 
   CheckCircle2, 
   Circle, 
@@ -18,7 +20,10 @@ import {
   Clock,
   ChevronRight,
   X,
-  Folder
+  Folder,
+  Globe,
+  Package,
+  CreditCard
 } from "lucide-react"
 
 interface OnboardingStep {
@@ -109,7 +114,7 @@ export default function DashboardHomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <img 
             src="https://cpwowrsesrefnugctpos.supabase.co/storage/v1/object/public/public//f.png"
@@ -133,10 +138,10 @@ export default function DashboardHomePage() {
 
   if (showPricing) {
     return (
-      <div className="min-h-screen bg-black relative">
+      <div className="min-h-screen relative">
         {/* Pricing Modal */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-          <div className="relative bg-black rounded-lg border border-gray-800 max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+                      <div className="relative bg-gray-900/95 backdrop-blur-md rounded-lg border border-gray-800 max-w-7xl w-full max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
             <button
               onClick={() => setShowPricing(false)}
@@ -160,14 +165,24 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6 max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 max-w-4xl mx-auto">
       {completedSteps < steps.length ? (
         // Show setup process if not completed
         <>
           {/* Welcome Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Welcome to your workspace{userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}
+            <h1 className="text-5xl font-bold text-white mb-2">
+              <SplitText 
+                text={`Hello${userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}!`}
+                className="text-5xl font-bold text-white"
+                delay={50}
+                duration={0.8}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 50, scale: 0.8 }}
+                to={{ opacity: 1, y: 0, scale: 1 }}
+                textAlign="left"
+              />
             </h1>
             <p className="text-gray-400">
               Let&apos;s get you set up with a few quick steps
@@ -324,88 +339,76 @@ export default function DashboardHomePage() {
         <>
           {/* Welcome Header for Completed Setup */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Welcome back{userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}
+            <h1 className="text-5xl font-bold text-white mb-2">
+              <SplitText 
+                text={`Hello${userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}!`}
+                className="text-5xl font-bold text-white"
+                delay={50}
+                duration={0.8}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 50, scale: 0.8 }}
+                to={{ opacity: 1, y: 0, scale: 1 }}
+                textAlign="left"
+              />
             </h1>
             <p className="text-gray-400">
               Your workspace is ready. Here&apos;s what&apos;s happening today.
             </p>
           </div>
 
-          {/* Main Dashboard Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Quick Stats */}
-            <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Folder className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Projects</p>
-                    <p className="text-2xl font-bold text-white">0</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <User className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Team Members</p>
-                    <p className="text-2xl font-bold text-white">1</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <Settings className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Plan</p>
-                    <p className="text-xl font-bold text-white capitalize">{userProfile?.subscription_plan || 'Free'}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Bento Grid Dashboard */}
+          <div className="mb-8 -mx-4">
+            <BentoGrid items={[
+              {
+                title: "View Projects",
+                meta: "0 active",
+                description: "Manage and track all your projects in one centralized workspace",
+                icon: <Folder className="w-4 h-4 text-blue-500" />,
+                status: "Active",
+                tags: ["Projects", "Management"],
+                colSpan: 2,
+                hasPersistentHover: true,
+                cta: "Go to Projects →",
+                onClick: () => router.push('/projects')
+              },
+              {
+                title: "View Domains",
+                meta: "0 connected",
+                description: "Manage your custom domains and DNS settings",
+                icon: <Globe className="w-4 h-4 text-emerald-500" />,
+                status: "Ready",
+                tags: ["Domains", "DNS"],
+                cta: "Manage Domains →",
+                onClick: () => {
+                  // TODO: Open domains modal
+                  alert('Domains modal will open here')
+                }
+              },
+              {
+                title: "Add/Modify Products",
+                meta: "Catalog",
+                description: "Create and manage your product catalog and inventory",
+                icon: <Package className="w-4 h-4 text-purple-500" />,
+                tags: ["Products", "Inventory"],
+                colSpan: 2,
+                cta: "Manage Products →"
+                // No onClick - no links needed as requested
+              },
+              {
+                title: `${userProfile?.subscription_plan?.charAt(0).toUpperCase()}${userProfile?.subscription_plan?.slice(1)} Plan` || "Free Plan",
+                meta: "Current",
+                description: "View and manage your subscription plan and billing settings",
+                icon: <CreditCard className="w-4 h-4 text-sky-500" />,
+                status: "Active",
+                tags: ["Billing", "Plan"],
+                cta: "View Profile →",
+                onClick: () => router.push('/settings')
+              },
+            ]} />
           </div>
 
-          {/* Quick Actions */}
-          <Card className="mt-8 bg-gray-900/50 border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription className="text-gray-400">
-                Get started with these common tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button 
-                  onClick={() => router.push('/projects')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white justify-start h-12"
-                >
-                  <Folder className="w-4 h-4 mr-2" />
-                  Create New Project
-                </Button>
-                <Button 
-                  onClick={() => router.push('/team')}
-                  variant="outline"
-                  className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 justify-start h-12"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Invite Team Members
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+
         </>
       )}
     </div>

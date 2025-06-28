@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
 
   if (!isValidToken) {
     return (
-      <div className="min-h-screen bg-black flex">
+      <div className="min-h-screen flex">
         {/* Left side - Logo */}
         <div className="flex-1 flex items-center justify-center">
           <div className="flex items-center">
@@ -152,7 +152,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen flex">
       {/* Left side - Logo */}
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center">

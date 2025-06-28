@@ -18,6 +18,7 @@ import {
   X
 } from "lucide-react"
 import Loader from "@/components/ui/loader"
+import Dock from "@/components/ui/dock"
 
 const sidebarItems = [
   {
@@ -83,7 +84,7 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader />
       </div>
     )
@@ -93,8 +94,37 @@ export default function DashboardLayout({
     return null
   }
 
+  // Create dock items from sidebar items
+  const dockItems = sidebarItems.map((item) => {
+    const Icon = item.icon
+    return {
+      icon: <Icon size={18} />,
+      label: item.title,
+      onClick: () => handleNavigation(item.href),
+      className: pathname === item.href ? "dock-item-active" : ""
+    }
+  })
+
+  // Add user profile and sign out to dock items
+  dockItems.push({
+    icon: <User size={18} />,
+    label: 'Profile',
+    onClick: () => {
+      // You can implement a profile modal or navigation here
+      alert('Profile clicked')
+    },
+    className: ""
+  })
+
+  dockItems.push({
+    icon: <LogOut size={18} />,
+    label: 'Sign Out',
+    onClick: signOut,
+    className: ""
+  })
+
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
@@ -103,9 +133,9 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Mobile Sidebar - Only visible on mobile */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-black border-r border-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+        "lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-gray-900/95 backdrop-blur-md border-r border-gray-800 transform transition-transform duration-300 ease-in-out",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
@@ -121,7 +151,7 @@ export default function DashboardLayout({
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="h-5 w-5" />
@@ -192,9 +222,9 @@ export default function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-0">
-        {/* Top bar */}
-        <div className="lg:hidden bg-black border-b border-gray-800 p-4">
+      <div className="flex-1">
+        {/* Top bar - Only visible on mobile */}
+        <div className="lg:hidden bg-gray-900/95 backdrop-blur-md border-b border-gray-800 p-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -214,10 +244,10 @@ export default function DashboardLayout({
         </div>
 
         {/* Page content */}
-        <main className="min-h-screen bg-black relative">
+        <main className="min-h-screen relative pb-24 lg:pb-32">
           {/* Loading overlay */}
           {pageLoading && (
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center transition-all duration-300">
+            <div className="absolute inset-0 bg-gray-900/30 backdrop-blur-sm z-50 flex items-center justify-center transition-all duration-300">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-white text-xs opacity-75">Loading...</p>
@@ -242,6 +272,16 @@ export default function DashboardLayout({
             </Suspense>
           </div>
         </main>
+
+        {/* Desktop Dock - Only visible on desktop */}
+        <div className="hidden lg:block">
+          <Dock 
+            items={dockItems}
+            panelHeight={68}
+            baseItemSize={50}
+            magnification={70}
+          />
+        </div>
       </div>
     </div>
   )

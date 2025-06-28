@@ -12,6 +12,8 @@ import {
 } from "lucide-react"
 import ProjectCreationFlow from "@/components/ui/project-creation-flow"
 import ProjectCard from "@/components/ui/project-card"
+import ProjectStatusModal from "@/components/ui/project-status-modal"
+import SplitText from "@/components/ui/split-text"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/hooks/use-auth"
 
@@ -19,6 +21,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -84,13 +88,32 @@ export default function ProjectsPage() {
     }
   }
 
+  const handleProjectClick = (project: any) => {
+    setSelectedProjectId(project.id)
+    setIsModalOpen(true)
+  }
+
+
+
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Projects</h1>
+            <h1 className="text-5xl font-bold text-white mb-2">
+              <SplitText 
+                text="Projects"
+                className="text-5xl font-bold text-white"
+                delay={50}
+                duration={0.8}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 50, scale: 0.8 }}
+                to={{ opacity: 1, y: 0, scale: 1 }}
+                textAlign="left"
+              />
+            </h1>
             <p className="text-gray-400">
               Manage and organize your projects
             </p>
@@ -167,10 +190,7 @@ export default function ProjectsPage() {
               <ProjectCard
                 key={project.id}
                 project={project}
-                onClick={() => {
-                  // Handle project click - could navigate to project details
-                  console.log('Project clicked:', project)
-                }}
+                onClick={() => handleProjectClick(project)}
               />
             ))}
           </div>
@@ -182,6 +202,18 @@ export default function ProjectsPage() {
           onClose={() => setIsFormOpen(false)}
           onProjectCreated={handleProjectCreated}
         />
+
+        {/* Project Status Modal */}
+        {selectedProjectId && (
+          <ProjectStatusModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false)
+              setSelectedProjectId(null)
+            }}
+            projectId={selectedProjectId}
+          />
+        )}
       </div>
     </div>
   )

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import SplitText from "@/components/ui/split-text"
 import { 
   Plus, 
   MessageSquare, 
@@ -23,7 +24,19 @@ export default function MessagesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Messages</h1>
+            <h1 className="text-5xl font-bold text-white mb-2">
+              <SplitText 
+                text="Messages"
+                className="text-5xl font-bold text-white"
+                delay={50}
+                duration={0.8}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 50, scale: 0.8 }}
+                to={{ opacity: 1, y: 0, scale: 1 }}
+                textAlign="left"
+              />
+            </h1>
             <p className="text-gray-400">
               Communicate with your team and collaborators
             </p>

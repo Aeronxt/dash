@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import SplitText from "@/components/ui/split-text"
+import Plan from "@/components/ui/plan"
 import { 
   Home as HomeIcon,
   BarChart3,
@@ -59,7 +61,17 @@ export default function HomePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">
-            Welcome Home{userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}
+            <SplitText 
+              text={`Hello${userProfile?.user_display_name ? `, ${userProfile.user_display_name}` : ''}!`}
+              className="text-5xl font-bold text-white"
+              delay={50}
+              duration={0.8}
+              ease="power3.out"
+              splitType="chars"
+              from={{ opacity: 0, y: 50, scale: 0.8 }}
+              to={{ opacity: 1, y: 0, scale: 1 }}
+              textAlign="left"
+            />
           </h1>
           <p className="text-gray-400">
             Your workspace overview and quick actions
@@ -83,7 +95,7 @@ export default function HomePage() {
               {stats.map((stat, index) => {
                 const Icon = stat.icon
                 return (
-                  <div key={index} className="bg-black/20 rounded-lg p-4 border border-gray-700/50">
+                  <div key={index} className="bg-gray-900/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
                     <div className="flex items-center gap-3">
                       <Icon className="w-5 h-5 text-blue-400" />
                       <div>
@@ -126,6 +138,17 @@ export default function HomePage() {
                 </Card>
               )
             })}
+          </div>
+        </div>
+
+        {/* Project Plan */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <Folder className="w-5 h-5 text-purple-400" />
+            Current Project Plan
+          </h3>
+          <div className="bg-gray-900/50 border-gray-800 rounded-lg border overflow-hidden">
+            <Plan />
           </div>
         </div>
 
