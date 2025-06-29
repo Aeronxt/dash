@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide password reveal buttons in MS Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 @layer utilities {
   @keyframes shimmer {
     0% {
