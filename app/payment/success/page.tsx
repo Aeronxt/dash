@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -66,9 +65,25 @@ export default function PaymentSuccessPage() {
 
   const updateUserPlan = async () => {
     try {
-      // Update user profile with Lite plan
+      // Extract plan name from payment details or URL params
+      let planName = planType || 'lite'; // Default to lite if not specified
+      
+      // Map plan names to subscription_plan values
+      const planMapping: { [key: string]: string } = {
+        'lite': 'lite',
+        'plus': 'plus',
+        'pro': 'pro',
+        'startup': 'startup',
+        'rising star': 'rising_star',
+        'rising_star': 'rising_star'
+      };
+      
+      // Get the mapped plan name or use the original if not found
+      const mappedPlan = planMapping[planName.toLowerCase()] || planName.toLowerCase();
+      
+      // Update user profile with the new plan
       const updateResult = await updateProfile({
-        subscription_plan: 'lite'
+        subscription_plan: mappedPlan
       });
       
       if (updateResult) {
@@ -82,10 +97,10 @@ export default function PaymentSuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-white" />
-          <p className="text-white">Verifying your payment...</p>
+          <p className="text-white/80">Verifying your payment...</p>
         </div>
       </div>
     );
@@ -93,95 +108,112 @@ export default function PaymentSuccessPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md bg-gray-900 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-red-400">Payment Verification Failed</CardTitle>
-            <CardDescription className="text-gray-400">{error}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/experiences">
-              <Button className="w-full bg-blue-500 hover:bg-blue-600">Return to Experiences</Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="mb-6">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-red-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Payment Verification Failed</h1>
+            <p className="text-white/60">{error}</p>
+          </div>
+          <Link href="/dashboard">
+            <Button className="bg-white text-black hover:bg-white/90 px-8 py-3 rounded-full font-medium">
+              Return to Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-gray-900 border-gray-800">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <CheckCircle className="h-16 w-16 text-green-500" />
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="text-center max-w-lg mx-auto">
+        {/* Animated Check Mark */}
+        <div className="mb-8">
+          <div className="relative mx-auto w-24 h-24 mb-6">
+            <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse"></div>
+            <div className="absolute inset-2 rounded-full bg-white/20"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <CheckCircle className="h-12 w-12 text-white animate-bounce" style={{
+                animationDelay: '0.5s',
+                animationDuration: '1s',
+                animationIterationCount: '3'
+              }} />
+            </div>
           </div>
-          <CardTitle className="text-green-400 text-2xl">Subscription Activated!</CardTitle>
-          <CardDescription className="text-gray-400">
-            {planType === 'lite' 
-              ? `Thank you for subscribing to the Lite plan${amount ? ` for $${amount} AUD/month` : ' for $9 AUD/month'}!`
-              : 'Thank you for your subscription to the Lite plan.'
-            }
-          </CardDescription>
-                     {planUpdated && (
-             <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-               <p className="text-green-400 text-sm">
-                 ✓ Your subscription to the Lite plan is now active
-               </p>
-             </div>
-           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {paymentDetails && (
-            <div className="space-y-2 text-sm bg-gray-800/50 p-4 rounded-lg">
-              <div className="flex justify-between text-gray-300">
-                <span>Status:</span>
-                <span className="font-medium text-green-400">{paymentDetails.status}</span>
+          
+          <h1 className="text-4xl font-bold text-white mb-3">
+            Payment Successful!
+          </h1>
+          <p className="text-xl text-white/70 mb-2">
+            Welcome to the {planType ? planType.charAt(0).toUpperCase() + planType.slice(1) : 'new'} plan
+          </p>
+          {amount && (
+            <p className="text-white/50">
+              ${amount} AUD/month
+            </p>
+          )}
+        </div>
+
+        {/* Plan Details */}
+        {paymentDetails && (
+          <div className="mb-8 space-y-4">
+            <div className="grid gap-3 text-left max-w-sm mx-auto">
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/60">Status</span>
+                <span className="text-white font-medium capitalize">{paymentDetails.status}</span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Email:</span>
-                <span className="font-medium">{paymentDetails.customer_email}</span>
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/60">Plan</span>
+                <span className="text-white font-medium">
+                  {planType ? planType.charAt(0).toUpperCase() + planType.slice(1) : 'New'} Plan
+                </span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Type:</span>
-                <span className="font-medium text-blue-400">
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/60">Type</span>
+                <span className="text-white font-medium">
                   {paymentDetails.mode === 'subscription' ? 'Monthly Subscription' : 'One-time Payment'}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Amount:</span>
-                <span className="font-medium">
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-white/60">Amount</span>
+                <span className="text-white font-medium">
                   ${(paymentDetails.amount_total / 100).toFixed(2)} {paymentDetails.currency?.toUpperCase()}
                   {paymentDetails.mode === 'subscription' ? '/month' : ''}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Plan:</span>
-                <span className="font-medium text-blue-400">Lite Plan</span>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-white/60">Email</span>
+                <span className="text-white font-medium text-sm">{paymentDetails.customer_email}</span>
               </div>
             </div>
-          )}
-          
-          <div className="space-y-3">
-            <Link href="/dashboard">
-              <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                Go to Dashboard
-              </Button>
-            </Link>
-            <Link href="/experiences">
-              <Button variant="outline" className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800">
-                Explore Experiences
-              </Button>
-            </Link>
           </div>
-          
-          <div className="text-center pt-4">
-            <p className="text-gray-500 text-sm">
-              Need help? <Link href="/contact" className="text-blue-400 hover:text-blue-300 underline">Contact support</Link>
+        )}
+
+        {/* Success Confirmation */}
+        {planUpdated && (
+          <div className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10">
+            <p className="text-white/80">
+              ✓ Your subscription is now active and ready to use
             </p>
           </div>
-        </CardContent>
-      </Card>
+        )}
+        
+        {/* Action Button */}
+        <div className="space-y-4">
+          <Link href="/dashboard">
+            <Button className="bg-white text-black hover:bg-white/90 px-12 py-4 rounded-full text-lg font-medium transition-all duration-300 hover:scale-105">
+              Continue to Dashboard
+            </Button>
+          </Link>
+          
+                     <p className="text-white/40 text-sm mt-6">
+             Need help? <a href="mailto:support@flowscape.xyz" className="text-white/60 hover:text-white underline">Contact support</a>
+           </p>
+        </div>
+      </div>
     </div>
   );
 } 

@@ -102,11 +102,11 @@ export default function SignInPage() {
         if (data && data.user) {
           toast({
             title: "Account created successfully!",
-            description: "Let's get your account set up!"
+            description: "Welcome to Dash!"
           })
           
-          // Redirect to onboarding after successful signup
-          router.push('/onboarding')
+          // Redirect to dashboard after successful signup
+          router.push('/dashboard')
         }
       } else {
         // Handle sign in

@@ -360,40 +360,92 @@ export const useAuth = () => {
   };
 
   const updatePassword = async (newPassword: string) => {
+    console.log('[updatePassword] Starting password update');
+    
     if (!supabase || !supabase.auth) {
+      console.error('[updatePassword] Supabase client not available');
       return { error: new Error('Supabase client not available') };
     }
 
     try {
+      // First check if user is authenticated
+      console.log('[updatePassword] Checking user authentication...');
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('[updatePassword] Auth error:', authError);
+        throw authError;
+      }
+      
+      if (!currentUser) {
+        console.error('[updatePassword] No user found');
+        throw new Error('You must be logged in to update your password');
+      }
+
+      console.log('[updatePassword] User authenticated, updating password...');
+      console.log('[updatePassword] User ID:', currentUser.id);
+      
+      // Update the password using Supabase auth
       const { data, error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
-      if (error) throw error;
+      console.log('[updatePassword] Supabase response:', { data, error });
+
+      if (error) {
+        console.error('[updatePassword] Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('[updatePassword] Password updated successfully');
       return { data, error: null };
     } catch (error: any) {
-      console.error('Password update error:', error);
+      console.error('[updatePassword] Caught error:', error);
+      console.error('[updatePassword] Error details:', {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        statusText: error.statusText
+      });
       return { data: null, error };
     }
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return { error: 'No user logged in' };
     if (!supabase) return { error: 'Supabase client not available' };
 
     try {
+      console.log('🚀 [updateProfile] Starting profile update:', updates);
+      
+      // Get the current authenticated user directly from Supabase
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !currentUser) {
+        console.error('❌ [updateProfile] Auth error:', authError);
+        return { error: authError || new Error('No user logged in') };
+      }
+
+      console.log('✅ [updateProfile] User authenticated:', currentUser.id);
+
       const { error } = await supabase
         .from('flowscape_users')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', currentUser.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [updateProfile] Database error:', error);
+        throw error;
+      }
+
+      console.log('✅ [updateProfile] Database update successful');
 
       // Refresh user profile
-      await fetchUserProfile(user.id);
+      await fetchUserProfile(currentUser.id);
+      
+      console.log('🎉 [updateProfile] Profile update complete');
       return { error: null };
     } catch (error: any) {
-      console.error('Update profile error:', error);
+      console.error('💥 [updateProfile] Update profile error:', error);
       return { error };
     }
   };
