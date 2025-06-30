@@ -1024,436 +1024,6 @@ export default function ProjectCreationFlow({ isOpen, onClose, onProjectCreated 
           </motion.div>
         )
 
-      case 3:
-        return (
-          <motion.div
-            key="step3"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Site Structure</h4>
-              <div className="space-y-2">
-                <Label htmlFor="topLevelPages">What top-level pages do you need?</Label>
-                <Input
-                  id="topLevelPages"
-                  value={projectData.topLevelPages}
-                  onChange={(e) => updateProjectData('topLevelPages', e.target.value)}
-                  placeholder="e.g. Home, About, Services, Blog, Contact"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nestedPages">Any nested pages or unique sections?</Label>
-                <Input
-                  id="nestedPages"
-                  value={projectData.nestedPages}
-                  onChange={(e) => updateProjectData('nestedPages', e.target.value)}
-                  placeholder="e.g. Team Bios, Case Studies"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Core Functionality</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  "Contact form",
-                  "Newsletter signup",
-                  "Blog / News module",
-                  "E-commerce / Shopping cart",
-                  "Booking or reservation system",
-                  "Member login / gated content",
-                  "Portfolio / Gallery",
-                  "Live chat or chatbot"
-                ].map((feature) => (
-                  <div key={feature} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={feature}
-                      checked={projectData.coreFunctionality.includes(feature)}
-                      onCheckedChange={() => handleArrayToggle('coreFunctionality', feature)}
-                    />
-                    <Label htmlFor={feature} className="text-sm text-gray-300">
-                      {feature}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="otherIntegrations">Other integrations (CRM, ERP, payment gateways)</Label>
-                <Input
-                  id="otherIntegrations"
-                  value={projectData.otherIntegrations}
-                  onChange={(e) => updateProjectData('otherIntegrations', e.target.value)}
-                  placeholder="Specify any additional integrations needed"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Content Supply</h4>
-              <div className="space-y-2">
-                <Label htmlFor="contentSupply">Will you provide all text, images, videos and PDFs?</Label>
-                <Input
-                  id="contentSupply"
-                  value={projectData.contentSupply}
-                  onChange={(e) => updateProjectData('contentSupply', e.target.value)}
-                  placeholder="Yes/No and details about what you can provide"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needCopywriting"
-                  checked={projectData.needCopywriting}
-                  onCheckedChange={(checked) => updateProjectData('needCopywriting', checked)}
-                />
-                <Label htmlFor="needCopywriting" className="text-sm text-gray-300">
-                  Need copywriting or photography services?
-                </Label>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="approximatePages">Approximate number of pages or posts</Label>
-                <Input
-                  id="approximatePages"
-                  value={projectData.approximatePages}
-                  onChange={(e) => updateProjectData('approximatePages', e.target.value)}
-                  placeholder="e.g. 5-10 pages"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">SEO & Analytics</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needSEO"
-                  checked={projectData.needSEO}
-                  onCheckedChange={(checked) => updateProjectData('needSEO', checked)}
-                />
-                <Label htmlFor="needSEO" className="text-sm text-gray-300">
-                  Do you need keyword research / on-page SEO?
-                </Label>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="existingAnalytics">Do you have existing analytics (Google Analytics, Tag Manager)?</Label>
-                <Input
-                  id="existingAnalytics"
-                  value={projectData.existingAnalytics}
-                  onChange={(e) => updateProjectData('existingAnalytics', e.target.value)}
-                  placeholder="Yes/No and which tools you use"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needGoalTracking"
-                  checked={projectData.needGoalTracking}
-                  onCheckedChange={(checked) => updateProjectData('needGoalTracking', checked)}
-                />
-                <Label htmlFor="needGoalTracking" className="text-sm text-gray-300">
-                  Will you need goal tracking or conversion funnels set up?
-                </Label>
-              </div>
-            </div>
-          </motion.div>
-        )
-
-      case 4:
-        return (
-          <motion.div
-            key="step4"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Existing Brand Assets</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="hasLogo"
-                  checked={projectData.hasLogo}
-                  onCheckedChange={(checked) => updateProjectData('hasLogo', checked)}
-                />
-                <Label htmlFor="hasLogo" className="text-sm text-gray-300">
-                  I have logo files (AI, SVG, PNG)
-                </Label>
-              </div>
-              {projectData.hasLogo && (
-                <div className="space-y-2">
-                  <Label htmlFor="logoFiles">Logo files description</Label>
-                  <Input
-                    id="logoFiles"
-                    value={projectData.logoFiles}
-                    onChange={(e) => updateProjectData('logoFiles', e.target.value)}
-                    placeholder="Describe your logo files and formats"
-                    className="bg-gray-900 border-gray-700 text-white"
-                  />
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="colorPalette">Color palette (hex codes)</Label>
-                <Input
-                  id="colorPalette"
-                  value={projectData.colorPalette}
-                  onChange={(e) => updateProjectData('colorPalette', e.target.value)}
-                  placeholder="e.g. #FF0000, #00FF00, #0000FF"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="brandFonts">Brand fonts or typographic style guide</Label>
-                <Input
-                  id="brandFonts"
-                  value={projectData.brandFonts}
-                  onChange={(e) => updateProjectData('brandFonts', e.target.value)}
-                  placeholder="Font names or style preferences"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Design Style & Preferences</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  "Clean / minimal",
-                  "Bold / colorful",
-                  "Corporate / professional",
-                  "Playful / creative",
-                  "Dark mode / high contrast"
-                ].map((style) => (
-                  <div key={style} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={style}
-                      checked={projectData.designStyle.includes(style)}
-                      onCheckedChange={() => handleArrayToggle('designStyle', style)}
-                    />
-                    <Label htmlFor={style} className="text-sm text-gray-300">
-                      {style}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mustHaveNotes">Any must-have look & feel notes</Label>
-                <Textarea
-                  id="mustHaveNotes"
-                  value={projectData.mustHaveNotes}
-                  onChange={(e) => updateProjectData('mustHaveNotes', e.target.value)}
-                  placeholder="Specific design requirements or preferences"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Layout Inspirations</h4>
-              <div className="space-y-2">
-                <Label htmlFor="headerStyle">Header style (navigation, hero banner, slider, video)</Label>
-                <Input
-                  id="headerStyle"
-                  value={projectData.headerStyle}
-                  onChange={(e) => updateProjectData('headerStyle', e.target.value)}
-                  placeholder="Describe preferred header layout"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="footerElements">Footer elements (links, socials, newsletter sign-up)</Label>
-                <Input
-                  id="footerElements"
-                  value={projectData.footerElements}
-                  onChange={(e) => updateProjectData('footerElements', e.target.value)}
-                  placeholder="What should be included in the footer"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Accessibility & Responsiveness</h4>
-              <div className="space-y-2">
-                <Label htmlFor="accessibilityRequirements">Do you have any accessibility requirements (WCAG)?</Label>
-                <Input
-                  id="accessibilityRequirements"
-                  value={projectData.accessibilityRequirements}
-                  onChange={(e) => updateProjectData('accessibilityRequirements', e.target.value)}
-                  placeholder="WCAG compliance level or specific requirements"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="space-y-3">
-                <Label>Priority devices (select all that apply)</Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {["Mobile", "Tablet", "Desktop"].map((device) => (
-                    <div key={device} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={device}
-                        checked={projectData.priorityDevices.includes(device)}
-                        onCheckedChange={() => handleArrayToggle('priorityDevices', device)}
-                      />
-                      <Label htmlFor={device} className="text-sm text-gray-300">
-                        {device}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )
-
-      case 5:
-        return (
-          <motion.div
-            key="step5"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Domain & Hosting</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="hasExistingDomain"
-                  checked={projectData.hasExistingDomain}
-                  onCheckedChange={(checked) => updateProjectData('hasExistingDomain', checked)}
-                />
-                <Label htmlFor="hasExistingDomain" className="text-sm text-gray-300">
-                  Do you have an existing domain name?
-                </Label>
-              </div>
-              {projectData.hasExistingDomain && (
-                <div className="space-y-2">
-                  <Label htmlFor="existingDomain">Existing domain</Label>
-                  <Input
-                    id="existingDomain"
-                    value={projectData.existingDomain}
-                    onChange={(e) => updateProjectData('existingDomain', e.target.value)}
-                    placeholder="yourdomain.com"
-                    className="bg-gray-900 border-gray-700 text-white"
-                  />
-                </div>
-              )}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needHostingSetup"
-                  checked={projectData.needHostingSetup}
-                  onCheckedChange={(checked) => updateProjectData('needHostingSetup', checked)}
-                />
-                <Label htmlFor="needHostingSetup" className="text-sm text-gray-300">
-                  Do you need hosting setup?
-                </Label>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Email & Integrations</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needBusinessEmail"
-                  checked={projectData.needBusinessEmail}
-                  onCheckedChange={(checked) => updateProjectData('needBusinessEmail', checked)}
-                />
-                <Label htmlFor="needBusinessEmail" className="text-sm text-gray-300">
-                  Will you use a business email (e.g. name@yourdomain.com)?
-                </Label>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="thirdPartyIntegrations">Third-party integrations required</Label>
-                <Input
-                  id="thirdPartyIntegrations"
-                  value={projectData.thirdPartyIntegrations}
-                  onChange={(e) => updateProjectData('thirdPartyIntegrations', e.target.value)}
-                  placeholder="Mailchimp, Salesforce, Stripe, Zapier, etc."
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Security & Compliance</h4>
-              <div className="space-y-2">
-                <Label htmlFor="dataPrivacyRequirements">Any data privacy requirements (GDPR, CCPA)?</Label>
-                <Input
-                  id="dataPrivacyRequirements"
-                  value={projectData.dataPrivacyRequirements}
-                  onChange={(e) => updateProjectData('dataPrivacyRequirements', e.target.value)}
-                  placeholder="GDPR, CCPA, or other compliance requirements"
-                  className="bg-gray-900 border-gray-700 text-white"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="needSSL"
-                  checked={projectData.needSSL}
-                  onCheckedChange={(checked) => updateProjectData('needSSL', checked)}
-                />
-                <Label htmlFor="needSSL" className="text-sm text-gray-300">
-                  SSL certificate needed?
-                </Label>
-              </div>
-            </div>
-          </motion.div>
-        )
-
-      case 6:
-        return (
-          <motion.div
-            key="step6"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium text-white">Post-launch support</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  "Monthly updates & backups",
-                  "Security monitoring",
-                  "Content additions",
-                  "Training for your team"
-                ].map((support) => (
-                  <div key={support} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={support}
-                      checked={projectData.postLaunchSupport.includes(support)}
-                      onCheckedChange={() => handleArrayToggle('postLaunchSupport', support)}
-                    />
-                    <Label htmlFor={support} className="text-sm text-gray-300">
-                      {support}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-8 p-6 bg-green-900/20 border border-green-700 rounded-lg">
-              <div className="flex items-center gap-3 mb-4">
-                <CheckCircle className="w-6 h-6 text-green-400" />
-                <h4 className="text-lg font-medium text-white">Ready to Create Project</h4>
-              </div>
-              <p className="text-gray-300 mb-4">
-                You have completed all the project requirements. We will create your project with all the details you have provided.
-              </p>
-              <div className="text-sm text-gray-400">
-                <p><strong>Company:</strong> {projectData.companyName || "Not specified"}</p>
-                <p><strong>Contact:</strong> {projectData.primaryContactName || "Not specified"}</p>
-                <p><strong>Purpose:</strong> {projectData.websitePurpose.join(", ") || "Not specified"}</p>
-              </div>
-            </div>
-          </motion.div>
-        )
-
       default:
         return null
     }
@@ -1462,12 +1032,12 @@ export default function ProjectCreationFlow({ isOpen, onClose, onProjectCreated 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-stretch">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="bg-gray-900 w-full overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
@@ -1493,11 +1063,11 @@ export default function ProjectCreationFlow({ isOpen, onClose, onProjectCreated 
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onClose}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </Button>
         </div>
 
@@ -1511,42 +1081,46 @@ export default function ProjectCreationFlow({ isOpen, onClose, onProjectCreated 
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 200px)' }}>
-          <AnimatePresence mode="wait">
-            {renderStepContent()}
-          </AnimatePresence>
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-4xl mx-auto">
+            <AnimatePresence mode="wait">
+              {renderStepContent()}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-800">
-          <Button
-            variant="outline"
-            onClick={prevStep}
-            disabled={currentStep === 1}
-            className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
+          <div className="max-w-4xl w-full mx-auto flex justify-between">
+            <Button
+              variant="outline"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
 
-          {currentStep < steps.length ? (
-            <Button
-              onClick={nextStep}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Next
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {isSubmitting ? "Creating Project..." : "Create Project"}
-              <CheckCircle className="w-4 h-4 ml-2" />
-            </Button>
-          )}
+            {currentStep < steps.length ? (
+              <Button
+                onClick={nextStep}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Next
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {isSubmitting ? "Creating Project..." : "Create Project"}
+                <CheckCircle className="w-4 h-4 ml-2" />
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>

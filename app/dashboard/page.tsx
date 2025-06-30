@@ -44,7 +44,7 @@ export default function DashboardHomePage() {
   const [showPricing, setShowPricing] = useState(false)
 
   const isOnboardingCompleted = userProfile?.onboarding_completed || false
-  const isPlanSelected = userProfile?.subscription_plan === 'lite'
+  const isPlanSelected = Boolean(userProfile?.subscription_plan && userProfile?.subscription_plan !== 'free')
 
   const steps: OnboardingStep[] = [
     {
