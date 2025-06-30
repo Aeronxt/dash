@@ -11,6 +11,10 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['stripe'],
   },
+  webpack: (config) => {
+    config.externals = [...config.externals, 'bufferutil', 'utf-8-validate'];
+    return config;
+  },
 };
 
 module.exports = nextConfig;
