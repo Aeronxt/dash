@@ -40,7 +40,7 @@ interface BackgroundThemeContextType {
 }
 
 const BackgroundThemeContext = createContext<BackgroundThemeContextType>({
-  backgroundTheme: 'default',
+  backgroundTheme: 'moon',
   setBackgroundTheme: () => {},
   saveBackgroundTheme: async () => {}
 })
@@ -54,7 +54,7 @@ export const useBackgroundTheme = () => {
 }
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  const [backgroundTheme, setBackgroundThemeState] = useState('default')
+  const [backgroundTheme, setBackgroundThemeState] = useState('moon')
   const [isLoaded, setIsLoaded] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
 
@@ -69,8 +69,8 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
           await loadBackgroundTheme(session.user)
         } else if (event === 'SIGNED_OUT') {
           setCurrentUser(null)
-          // Reset to default theme when user signs out
-          setBackgroundThemeState('default')
+          // Reset to moon theme when user signs out
+          setBackgroundThemeState('moon')
           setIsLoaded(true)
         }
       }
@@ -105,8 +105,8 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 
       if (error) {
         console.error('Error fetching user preferences:', error)
-        // If there's an error, still set to default and mark as loaded
-        setBackgroundThemeState('default')
+        // If there's an error, still set to moon and mark as loaded
+        setBackgroundThemeState('moon')
       } else if (data?.preferences?.backgroundTheme) {
         console.log('Found saved background theme:', data.preferences.backgroundTheme)
         // Validate that the theme exists in our available themes
@@ -114,16 +114,16 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
         if (isValidTheme) {
           setBackgroundThemeState(data.preferences.backgroundTheme)
         } else {
-          console.warn('Invalid background theme found:', data.preferences.backgroundTheme, 'using default')
-          setBackgroundThemeState('default')
+          console.warn('Invalid background theme found:', data.preferences.backgroundTheme, 'using moon')
+          setBackgroundThemeState('moon')
         }
       } else {
-        console.log('No saved background theme found, using default')
-        setBackgroundThemeState('default')
+        console.log('No saved background theme found, using moon')
+        setBackgroundThemeState('moon')
       }
     } catch (error) {
       console.error('Error loading background theme:', error)
-      setBackgroundThemeState('default')
+      setBackgroundThemeState('moon')
     } finally {
       setIsLoaded(true)
     }

@@ -22,6 +22,7 @@ export interface UserProfile {
   user_country?: string;
   user_display_name?: string;
   onboarding_completed?: boolean;
+  bdreference?: string;
 }
 
 export const useAuth = () => {

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, ChevronDown } from "lucide-react"
+import { Check, ChevronDown, CreditCard, Smartphone, Copy } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -12,6 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
+import { supabase } from "@/lib/supabaseClient"
 
 import { getStripeConfig } from "@/lib/stripe-config"
 
@@ -40,6 +52,17 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
   const [planType, setPlanType] = useState<"Personal" | "Business">("Personal")
   const [country, setCountry] = useState("AU")
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  
+  // Bangladesh payment modal states
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | null>(null)
+  const [mobileWalletType, setMobileWalletType] = useState<"bkash" | "nagad" | "rocket" | null>(null)
+  const [bkashReference, setBkashReference] = useState("")
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  
+  // Get current user
+  const { user } = useAuth()
   
   // Check Stripe configuration
   const stripeConfig = getStripeConfig()
@@ -102,6 +125,140 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
     }
     
     return links[planName] || null
+  }
+
+  // Handle Bangladesh payment confirmation
+  const handleBangladeshPayment = async () => {
+    console.log('🔄 Starting Bangladesh payment process...')
+    console.log('📝 Reference:', bkashReference.trim())
+    console.log('👤 User:', user?.id)
+    console.log('📦 Selected Plan:', selectedPlan?.name)
+
+    if (!bkashReference.trim()) {
+      toast({
+        title: "Reference Required",
+        description: "Please enter your bKash transaction reference number",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to complete your purchase",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsProcessingPayment(true)
+    
+    try {
+      console.log('💾 Updating database...')
+      
+      // First check if user exists in flowscape_users table
+      const { data: existingUser, error: checkError } = await supabase
+        .from('flowscape_users')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      console.log('🔍 User check result:', { existingUser, checkError })
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking user existence:', checkError)
+        toast({
+          title: "Error",
+          description: "Unable to verify user account. Please try again.",
+          variant: "destructive"
+        })
+        setIsProcessingPayment(false)
+        return
+      }
+
+      if (!existingUser) {
+        console.log('👤 User not found in flowscape_users, creating...')
+        // Create user if doesn't exist
+        const { error: createError } = await supabase
+          .from('flowscape_users')
+          .insert([{
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || '',
+            bdreference: bkashReference.trim(),
+            subscription_plan: selectedPlan?.name.toLowerCase() || 'free',
+            user_role: 'user',
+            is_active: true
+          }])
+
+        if (createError) {
+          console.error('Error creating user:', createError)
+          toast({
+            title: "Error",
+            description: "Failed to create user account. Please contact support.",
+            variant: "destructive"
+          })
+          setIsProcessingPayment(false)
+          return
+        }
+      } else {
+        // Update existing user
+        const { error } = await supabase
+          .from('flowscape_users')
+          .update({ 
+            bdreference: bkashReference.trim(),
+            subscription_plan: selectedPlan?.name.toLowerCase() || 'free'
+          })
+          .eq('id', user.id)
+
+        console.log('✅ Database update result:', { error })
+
+        if (error) {
+          console.error('Error saving bKash reference:', error)
+          toast({
+            title: "Error",
+            description: "Failed to save payment reference. Please try again.",
+            variant: "destructive"
+          })
+          setIsProcessingPayment(false)
+          return
+        }
+      }
+
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      console.log('🎉 Payment process completed successfully!')
+      
+      toast({
+        title: "Payment Received!",
+        description: "Thanks for subscribing, please wait 12-24 hours for your account to be activated.",
+      })
+      
+          setShowPaymentModal(false)
+    setPaymentMethod(null)
+    setMobileWalletType(null)
+    setBkashReference("")
+    } catch (error) {
+      console.error('Error processing Bangladesh payment:', error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
+
+  // Copy phone number to clipboard
+  const copyPhoneNumber = () => {
+    navigator.clipboard.writeText("+8801842521774")
+    toast({
+      title: "Copied!",
+      description: "Phone number copied to clipboard",
+    })
   }
 
   const basePlans = {
@@ -320,9 +477,10 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
 
               <Button
                 onClick={async () => {
-                  // Handle Bangladesh - show message for unsupported region
+                  // Handle Bangladesh - show payment modal
                   if (country === "BD") {
-                    alert('Bangladesh payments are currently handled through special pricing. Please contact support for assistance with your subscription.');
+                    setSelectedPlan(plan);
+                    setShowPaymentModal(true);
                     return;
                   }
 
@@ -436,8 +594,6 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
                   ? "Processing..." 
                   : ((country === "AU" || country === "WW") && !stripeConfig.isConfigured)
                     ? "Configuration Required"
-                    : country === "BD"
-                    ? "Contact Support"
                     : plan.buttonText
                 }
               </Button>
@@ -445,6 +601,231 @@ export default function PricingPlans({ onSelectPlan }: PricingPlansProps) {
           </Card>
         ))}
       </div>
+
+      {/* Bangladesh Payment Modal */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="sm:max-w-md bg-gray-900 border-gray-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Complete Your Payment
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {selectedPlan && `Subscribe to ${selectedPlan.name} - ${selectedPlan.currency}${selectedPlan.price}/month`}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {!paymentMethod ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-400">Select your payment method</p>
+                
+                <button
+                  onClick={() => setPaymentMethod("card")}
+                  className="w-full p-4 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 hover:bg-gray-800 transition-all duration-200 flex items-center gap-4 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gray-700 group-hover:bg-gray-600 flex items-center justify-center transition-colors">
+                    <CreditCard className="w-6 h-6 text-gray-300" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold">Credit/Debit Card</p>
+                    <p className="text-sm text-gray-400">Pay with Visa, Mastercard, etc.</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setPaymentMethod("wallet")}
+                  className="w-full p-4 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 hover:bg-gray-800 transition-all duration-200 flex items-center gap-4 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gray-700 group-hover:bg-gray-600 flex items-center justify-center transition-colors">
+                    <Smartphone className="w-6 h-6 text-gray-300" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold">Mobile Wallet</p>
+                    <p className="text-sm text-gray-400">Pay with bKash, Nagad, Rocket</p>
+                  </div>
+                </button>
+              </div>
+            ) : paymentMethod === "card" ? (
+              <div className="space-y-4">
+                <div className="bg-gray-800/50 rounded-lg p-6 text-center">
+                  <CreditCard className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                  <p className="text-lg font-semibold text-gray-300">Currently Not Available</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Credit/Debit card payments are coming soon
+                  </p>
+                </div>
+
+                {/* International Payment Notice */}
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-blue-400 text-sm font-bold">!</span>
+                    </div>
+                    <div>
+                      <p className="text-blue-200 text-sm font-medium mb-1">
+                        International Card Available?
+                      </p>
+                      <p className="text-blue-300/80 text-sm leading-relaxed">
+                        If your card is activated for international payments, you can select your region as <strong>Worldwide</strong> and proceed with the payment using our secure Stripe integration.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setCountry("WW")
+                      setShowPaymentModal(false)
+                      setPaymentMethod(null)
+                      setMobileWalletType(null)
+                    }}
+                    className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white"
+                  >
+                    Switch to Worldwide & Use Card Payment
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setPaymentMethod(null)
+                    setMobileWalletType(null)
+                  }}
+                  variant="outline"
+                  className="w-full bg-gray-800 hover:bg-gray-700 border-gray-700"
+                >
+                  Back to Payment Methods
+                </Button>
+              </div>
+            ) : paymentMethod === "wallet" && !mobileWalletType ? (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-400">Select your mobile wallet</p>
+                
+                <button
+                  onClick={() => setMobileWalletType("bkash")}
+                  className="w-full p-4 rounded-lg border border-gray-700 hover:border-gray-600 bg-gray-800/50 hover:bg-gray-800 transition-all duration-200 flex items-center justify-center group"
+                >
+                  <img 
+                    src="https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/mobilepaymentslogo//Bkash-Logo.png" 
+                    alt="bKash" 
+                    className="h-12 w-auto group-hover:scale-105 transition-transform duration-200"
+                  />
+                </button>
+
+                <button
+                  onClick={() => setMobileWalletType("nagad")}
+                  className="w-full p-4 rounded-lg border border-gray-700 bg-gray-800/30 transition-all duration-200 flex items-center justify-center opacity-50 cursor-not-allowed relative"
+                  disabled
+                >
+                  <img 
+                    src="https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/mobilepaymentslogo//Nagad-Logo.wine.png" 
+                    alt="Nagad" 
+                    className="h-12 w-auto grayscale"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">Coming Soon</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setMobileWalletType("rocket")}
+                  className="w-full p-4 rounded-lg border border-gray-700 bg-gray-800/30 transition-all duration-200 flex items-center justify-center opacity-50 cursor-not-allowed relative"
+                  disabled
+                >
+                  <img 
+                    src="https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/mobilepaymentslogo//Rocket_mobile_banking_logo.svg.png" 
+                    alt="Rocket" 
+                    className="h-12 w-auto grayscale"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">Coming Soon</span>
+                  </div>
+                </button>
+
+                <Button
+                  onClick={() => setPaymentMethod(null)}
+                  variant="outline"
+                  className="w-full bg-gray-800 hover:bg-gray-700 border-gray-700"
+                >
+                  Back to Payment Methods
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-pink-500/10 border border-pink-500/20 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <img 
+                      src="https://wrczctvglyhprlbkogjb.supabase.co/storage/v1/object/public/mobilepaymentslogo//Bkash-Logo.png" 
+                      alt="bKash" 
+                      className="h-8"
+                    />
+                    <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/30">
+                      Personal Account
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-300">Send money to this personal account:</p>
+                    <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-3">
+                      <span className="font-mono text-lg flex-1">+8801842521774</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={copyPhoneNumber}
+                        className="hover:bg-gray-700"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2 text-sm text-gray-400">
+                    <p>1. Open your bKash app</p>
+                    <p>2. Select &quot;Send Money&quot;</p>
+                    <p>3. Enter the number above</p>
+                    <p>4. Enter amount: {selectedPlan?.currency}{selectedPlan?.price}</p>
+                    <p>5. Complete the payment and note the reference</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reference" className="text-gray-300">
+                    Enter Reference Number
+                  </Label>
+                  <Input
+                    id="reference"
+                    value={bkashReference}
+                    onChange={(e) => setBkashReference(e.target.value)}
+                    placeholder="Enter your bKash transaction reference"
+                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                  />
+                  <p className="text-xs text-gray-500">
+                    You&apos;ll find this in your bKash payment confirmation
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setMobileWalletType(null)
+                      setBkashReference("")
+                    }}
+                    variant="outline"
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 border-gray-700"
+                    disabled={isProcessingPayment}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleBangladeshPayment}
+                    className="flex-1 bg-pink-500 hover:bg-pink-600"
+                    disabled={isProcessingPayment || !bkashReference.trim()}
+                  >
+                    {isProcessingPayment ? "Processing..." : "Confirm Payment"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

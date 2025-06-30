@@ -121,7 +121,7 @@ export default function PaymentSuccessPage() {
             <Button className="bg-white text-black hover:bg-white/90 px-8 py-3 rounded-full font-medium">
               Return to Dashboard
             </Button>
-          </Link>
+            </Link>
         </div>
       </div>
     );
@@ -153,12 +153,12 @@ export default function PaymentSuccessPage() {
           {amount && (
             <p className="text-white/50">
               ${amount} AUD/month
-            </p>
+               </p>
           )}
-        </div>
+             </div>
 
         {/* Plan Details */}
-        {paymentDetails && (
+          {paymentDetails && (
           <div className="mb-8 space-y-4">
             <div className="grid gap-3 text-left max-w-sm mx-auto">
               <div className="flex justify-between items-center py-2 border-b border-white/10">

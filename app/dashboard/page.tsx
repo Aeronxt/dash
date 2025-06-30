@@ -189,6 +189,30 @@ export default function DashboardHomePage() {
             </p>
           </div>
 
+          {/* Bangladesh Payment Confirmation Message */}
+          {userProfile?.bdreference && (
+            <Card className="bg-gradient-to-r from-pink-500/10 to-orange-500/10 border-pink-500/20 mb-8">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-pink-500/20 rounded-lg">
+                    <Clock className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-white">Payment Confirmation</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      bKash Reference: {userProfile.bdreference}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-pink-200">
+                  Thanks for subscribing, your payment will be confirmed within 12-24 hours.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Progress Overview */}
           <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20 mb-8">
             <CardHeader>
@@ -356,6 +380,30 @@ export default function DashboardHomePage() {
               Your workspace is ready. Here&apos;s what&apos;s happening today.
             </p>
           </div>
+
+          {/* Bangladesh Payment Confirmation Message */}
+          {userProfile?.bdreference && (
+            <Card className="bg-gradient-to-r from-pink-500/10 to-orange-500/10 border-pink-500/20 mb-8">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-pink-500/20 rounded-lg">
+                    <Clock className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-white">Payment Confirmation</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      bKash Reference: {userProfile.bdreference}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-pink-200">
+                  Thanks for subscribing, your payment will be confirmed within 12-24 hours.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Bento Grid Dashboard */}
           <div className="mb-8 -mx-4">
