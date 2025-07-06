@@ -30,16 +30,12 @@ export const useAuth = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Set client flag
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    // Only run on client side
-    if (!isClient) return;
+    // Safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 10000); // 10 second timeout
 
     // Safety check for supabase client
     if (!supabase || !supabase.auth) {
@@ -57,30 +53,34 @@ export const useAuth = () => {
         
         if (session?.user) {
           // Try to fetch user profile, if it doesn't exist, create it
-          const profileExists = await fetchUserProfile(session.user.id);
-          if (!profileExists && session.user) {
-            console.log('User profile not found, creating new profile...');
-            await createOAuthUserProfile(session.user);
+          try {
+            const profileExists = await fetchUserProfile(session.user.id);
+            if (!profileExists && session.user) {
+              console.log('User profile not found, creating new profile...');
+              await createOAuthUserProfile(session.user);
+            }
+          } catch (error) {
+            console.error('Error handling user profile:', error);
           }
         }
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
         setLoading(false);
+        clearTimeout(timeoutId);
       }
     };
 
     getSession();
 
     // Listen for auth changes
-    let subscription: any;
-    try {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          try {
             // Check if this is a new OAuth user and create profile if needed
             if (event === 'SIGNED_IN' && session.user.app_metadata?.provider !== 'email') {
               await createOAuthUserProfile(session.user);
@@ -91,24 +91,21 @@ export const useAuth = () => {
               await createOAuthUserProfile(session.user);
               await fetchUserProfile(session.user.id);
             }
-          } else {
-            setUserProfile(null);
+          } catch (error) {
+            console.error('Error handling user profile in auth change:', error);
           }
-          setLoading(false);
+        } else {
+          setUserProfile(null);
         }
-      );
-      subscription = authSubscription;
-    } catch (error) {
-      console.error('Error setting up auth state change listener:', error);
-      setLoading(false);
-    }
+        setLoading(false);
+      }
+    );
 
     return () => {
-      if (subscription && typeof subscription.unsubscribe === 'function') {
-        subscription.unsubscribe();
-      }
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
     };
-  }, [isClient]);
+  }, []);
 
   const fetchUserProfile = async (userId: string) => {
     if (!supabase) {

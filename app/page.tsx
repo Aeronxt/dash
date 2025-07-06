@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import Loader from "@/components/ui/loader"
@@ -8,6 +8,16 @@ import Loader from "@/components/ui/loader"
 export default function HomePage() {
   const router = useRouter()
   const { user, loading } = useAuth()
+  const [showTimeout, setShowTimeout] = useState(false)
+
+  useEffect(() => {
+    // Add a timeout to show a message if loading takes too long
+    const timeoutId = setTimeout(() => {
+      setShowTimeout(true)
+    }, 5000) // Show message after 5 seconds
+
+    return () => clearTimeout(timeoutId)
+  }, [])
 
   useEffect(() => {
     if (!loading) {
@@ -34,6 +44,17 @@ export default function HomePage() {
           <Loader />
         </div>
         <p className="text-gray-400">Loading...</p>
+        {showTimeout && (
+          <div className="text-center mt-4">
+            <p className="text-gray-400">Taking longer than expected...</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-blue-500 hover:text-blue-400 mt-2"
+            >
+              Click here to refresh
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
